@@ -33,8 +33,8 @@ class Field(_Field, metaclass=FieldMeta):
 
     def __init__(self, null: bool = None, default: t.Any = None, **meta):
         self.null = null
-        self.meta = meta
         self.default = default
+        self.meta = meta
 
     def bind(self, model: 'Model', name: str):
         self.name = name

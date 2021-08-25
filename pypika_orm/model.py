@@ -1,12 +1,18 @@
 import typing as t
 
+from copy import deepcopy
 from pypika.queries import Table, Selectable
 
 from .fields import Field
 
 
+INHERITANCE_OPTIONS = {'fields', 'foreign_keys', 'primary_key'}
+
+
 class ModelOptions:
     """Prepare options for an model."""
+
+    fields: t.Dict[str, Field]
 
     table_name: str = ''
     primary_key: t.Optional[t.List[str]] = None
@@ -17,8 +23,13 @@ class ModelOptions:
         for base in reversed(cls.mro()):
             if hasattr(base, "meta") and isinstance(base.meta, ModelOptions):
                 for k, v in base.meta.__dict__.items():
-                    if not k.startswith('_'):
-                        setattr(self, k, v)
+                    if k in INHERITANCE_OPTIONS:
+                        setattr(self, k, deepcopy(v))
+
+        if hasattr(cls, 'Meta'):
+            for k, v in cls.Meta.__dict__.items():
+                if not k.startswith('_'):
+                    setattr(self, k, v)
 
         self.setup(cls)
 
@@ -30,12 +41,15 @@ class ModelOptions:
         self.table = Table(self.table_name)  # TODO: do we need it?
         self.foreign_keys = {}
 
-        self.fields = {}
+        self.fields = getattr(self, 'fields', {})
+        for name, field in self.fields.items():
+            field.bind(cls, name)
+
         for name, attr in cls.__dict__.items():
             if isinstance(attr, Field):
                 attr.bind(cls, name)
 
-        if not getattr(self, 'primary_key', None) and self.fields:
+        if not self.primary_key and self.fields:
             self.primary_key = list(self.fields.keys())[0],
 
 

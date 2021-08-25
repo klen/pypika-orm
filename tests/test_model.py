@@ -1,5 +1,3 @@
-import pytest
-
 import datetime as dt
 
 
@@ -26,7 +24,6 @@ def test_models(User, Role):
     assert isinstance(user.created, dt.datetime)
 
 
-@pytest.mark.skip
 def test_inheritance():
     from pypika_orm import Model, fields
 
@@ -41,3 +38,7 @@ def test_inheritance():
     assert Test.meta
     assert Test.meta.fields
     assert 'created' in Test.meta.fields
+
+    created = Test.meta.fields['created']
+    assert str(created.table) == '"test"'
+
