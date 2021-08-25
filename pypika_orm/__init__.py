@@ -1,6 +1,6 @@
 """Simple ORM based on pypika."""
 
-__version__ = '0.0.8'
+__version__ = '0.0.9'
 
 
 from .model import Model  # noqa
