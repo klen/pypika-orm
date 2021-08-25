@@ -30,23 +30,30 @@ $ pip install pypika-orm[mysql]
 ## Usage
 
 ```python
-    from aio_databases import Database
+    from pypika_orm import Model, fields
 
-    db = Database('sqlite:///:memory:')
+    class Role(Model):
+        id = fields.Auto()
+        name = fields.Varchar(max_length=100, default='user')
 
-    await db.execute('select $1', '1')
-    await db.executemany('select $1', '1', '2', '3')
+    class User(Model):
+        id = fields.Auto()
+        name = fields.Varchar()
+        is_active = fields.Bool(default=True, null=False)
 
-    res = await db.fetchall('select (2 * $1) res', 2)
-    assert res == [(4,)]
+        role_id = fields.ForeignKey(Role.id)
 
-    res = await db.fetchone('select (2 * $1) res', 2)
-    assert res == (4,)
-    assert isinstance(res, db.backend.record_cls)
+    from pypika_orm import Manager
 
-    res = await db.fetchval('select 2 * $1', 2)
-    assert res == 4
+    async with Manager('sqlite:///:memory:') as manager:
+        await manager(Role).create_table().if_not_exists().execute()
+        await manager(User).create_table().if_not_exists().execute()
 
+        await manager(Role).insert(name='user').execute()
+        await manager(User).insert(name='jim', role_id=1).execute()
+
+        [user] = await manager(User).select().fetchall()
+        assert user
 ```
 
 ## Bug tracker
