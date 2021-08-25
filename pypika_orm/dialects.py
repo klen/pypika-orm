@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import typing as t
 
+from pypika.queries import Table
 from pypika.dialects import (
     Dialects, PostgreSQLQueryBuilder,
     MySQLQuery, MySQLQueryBuilder, SQLLiteQueryBuilder
@@ -54,11 +55,11 @@ class ModelMySQLQuery(MySQLQuery):
         return ModelMySQLQueryBuilder(**kwargs)
 
     @classmethod
-    def create_table(cls, table: t.Union[str, t.Table], **kwargs) -> ModelCreateQueryBuilder:
+    def create_table(cls, table: t.Union[str, Table], **kwargs) -> ModelCreateQueryBuilder:
         return ModelMySQLCreateQueryBuilder(**kwargs).create_table(table)
 
     @classmethod
-    def drop_table(cls, table: t.Union[str, t.Table], **kwargs) -> ModelCreateQueryBuilder:
+    def drop_table(cls, table: t.Union[str, Table], **kwargs) -> ModelCreateQueryBuilder:
         return ModelMySQLDropQueryBuilder(**kwargs).drop_table(table)
 
 

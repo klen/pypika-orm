@@ -10,6 +10,7 @@ from pypika.queries import (
     DropQueryBuilder,
     Query,
     QueryBuilder,
+    Table,
     builder,
 )
 
@@ -25,7 +26,7 @@ class ModelDBMixin:
 
     def __init__(self, *args, db: Database = None, **kwargs):
         self._db = db
-        super(ModelDBMixin, self).__init__(*args, **kwargs)
+        super(ModelDBMixin, self).__init__(*args, **kwargs)  # type: ignore
 
     def execute(self, *args, **kwargs) -> t.Awaitable:
         assert self._db, 'DB is not initializated'
@@ -67,7 +68,7 @@ class ModelBuilderMixin(ModelDBMixin):
         super().__init__(**kwargs)
         self._from = [model]
 
-    def select(self, *terms: t.Any) -> ModelQueryBuilder:
+    def select(self: QueryBuilder, *terms: t.Any) -> ModelQueryBuilder:
         if not (terms or self._selects):
             terms = self._model,
 
@@ -78,13 +79,13 @@ class ModelBuilderMixin(ModelDBMixin):
             else:
                 prepared_terms.append(term)
 
-        return super().select(*prepared_terms)
+        return QueryBuilder.select(self, *prepared_terms)
 
     @builder
-    def insert(self, *terms: t.Any, **values):
+    def insert(self: QueryBuilder, *terms: t.Any, **values):
         self._insert_table = self._model
         if terms:
-            return super().insert(*terms)
+            return QueryBuilder.insert(self, *terms)
 
         if not values:
             return self
@@ -104,7 +105,7 @@ class ModelBuilderMixin(ModelDBMixin):
         self._from = []
         self._update_table = self._model
 
-    def create_table(self) -> ModelCreateQueryBuilder:
+    def create_table(self: QueryBuilder) -> ModelCreateQueryBuilder:
         meta = self._model.meta
         builder = self.QUERY_CLS.create_table(meta.table, db=self._db, dialect=self.dialect)
         columns = {field.name: Column(
@@ -123,7 +124,7 @@ class ModelBuilderMixin(ModelDBMixin):
 
         return builder
 
-    def drop_table(self) -> ModelDropQueryBuilder:
+    def drop_table(self: QueryBuilder) -> ModelDropQueryBuilder:
         meta = self._model.meta
         return self.QUERY_CLS.drop_table(meta.table, db=self._db, dialect=self.dialect)
 
@@ -135,11 +136,11 @@ class ModelQuery(Query):
         return ModelQueryBuilder(**kwargs)
 
     @classmethod
-    def create_table(cls, table: t.Union[str, t.Table], **kwargs) -> ModelCreateQueryBuilder:
+    def create_table(cls, table: t.Union[str, Table], **kwargs) -> ModelCreateQueryBuilder:
         return ModelCreateQueryBuilder(**kwargs).create_table(table)
 
     @classmethod
-    def drop_table(cls, table: t.Union[str, t.Table], **kwargs) -> ModelDropQueryBuilder:
+    def drop_table(cls, table: t.Union[str, Table], **kwargs) -> ModelDropQueryBuilder:
         return ModelDropQueryBuilder(**kwargs).drop_table(table)
 
 
