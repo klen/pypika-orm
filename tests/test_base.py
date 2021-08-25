@@ -43,13 +43,13 @@ def test_select(manager, User, Role):
     assert qs
     assert str(qs) == 'SELECT "id","name","created","is_active","role_id" FROM "user"'
 
-    # TODO: Support joins
-    #  qs = qb.select(User, Role.name).join(Role).on(User.role_id == Role.id).where(User.is_active)
-    #  assert qs
-    #  assert str(qs) == (
-    #      'SELECT "user"."id","user"."name","user"."is_active","user"."role_id","role"."name" '
-    #      'FROM "user" JOIN "role" ON "user"."role_id"="role"."id" WHERE "user"."is_active"'
-    #  )
+    qs = qb.select(User, Role.name).join(Role).on(User.role_id == Role.id).where(User.is_active)
+    assert qs
+    assert str(qs) == (
+        'SELECT "user"."id","user"."name","user"."created",'
+        '"user"."is_active","user"."role_id","role"."name" '
+        'FROM "user" JOIN "role" ON "user"."role_id"="role"."id" WHERE "user"."is_active"'
+    )
 
 
 def test_insert(manager, User):

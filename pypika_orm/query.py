@@ -66,7 +66,7 @@ class ModelBuilderMixin(ModelDBMixin):
     def __init__(self, model: Model, **kwargs):
         self._model = model
         super().__init__(**kwargs)
-        self._from = [model]
+        self._from = [model.meta.table]
 
     def select(self: QueryBuilder, *terms: t.Any) -> ModelQueryBuilder:
         if not (terms or self._selects):
@@ -104,6 +104,12 @@ class ModelBuilderMixin(ModelDBMixin):
 
         self._from = []
         self._update_table = self._model
+
+    def join(self, item: t.Any, **kwargs):
+        if isclass(item) and issubclass(item, Model):
+            item = item.meta.table
+
+        return QueryBuilder.join(self, item, **kwargs)
 
     def create_table(self: QueryBuilder) -> ModelCreateQueryBuilder:
         meta = self._model.meta
