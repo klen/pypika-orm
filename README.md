@@ -3,6 +3,11 @@
 The package gives you ORM for [PyPika](https://github.com/kayak/pypika) with
 asycio support for a range of databases (SQLite, PostgreSQL, MySQL).
 
+[![Tests Status](https://github.com/klen/pypika-orm/workflows/tests/badge.svg)](https://github.com/klen/pypika-orm/actions)
+[![PYPI Version](https://img.shields.io/pypi/v/pypika-orm)](https://pypi.org/project/pypika-orm/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/pypika-orm)](https://pypi.org/project/pypika-orm/)
+
+
 ## Warning
 
 The project is in early pre-alpha state and not ready for production
