@@ -15,8 +15,8 @@ class ModelOptions:
     def __init__(self, cls):
         """Inherit meta options."""
         for base in reversed(cls.mro()):
-            if hasattr(base, "Meta"):
-                for k, v in base.Meta.__dict__.items():
+            if hasattr(base, "meta") and isinstance(base.meta, ModelOptions):
+                for k, v in base.meta.__dict__.items():
                     if not k.startswith('_'):
                         setattr(self, k, v)
 
@@ -31,8 +31,7 @@ class ModelOptions:
         self.foreign_keys = {}
 
         self.fields = {}
-        for name in vars(cls):
-            attr = getattr(cls, name)
+        for name, attr in cls.__dict__.items():
             if isinstance(attr, Field):
                 attr.bind(cls, name)
 
@@ -46,7 +45,12 @@ class Model(Selectable):
     def __init__(self, **kwargs):
         """Initialize the model."""
         for name, field in self.meta.fields.items():
-            value = kwargs.get(name, None if field.default is None else field.default)
+            if field.default is None:
+                continue
+
+            setattr(self, name, field.default() if callable(field.default) else field.default)
+
+        for name, value in kwargs.items():
             setattr(self, name, value)
 
     def __init_subclass__(cls, **kwargs):

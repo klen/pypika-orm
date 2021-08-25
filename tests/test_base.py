@@ -8,32 +8,11 @@ def manager():
     return Manager()
 
 
-def test_models(User, Role):
-    assert Role
-    assert Role.meta
-    assert Role.meta.fields
-
-    role = Role(name='test')
-    assert role
-    assert role.name
-
-    assert User
-    assert User.meta.fields
-    assert User.meta.primary_key == ('id',)
-
-    user = User(name='test', role_id=1)
-    assert user
-    assert user.is_active is True
-    assert user.name == 'test'
-    assert user.role_id == 1
-
-
 def test_fields(Role, User):
     field = Role.meta.fields['id']
     assert field.db_type == 'INTEGER'
     assert field.py_type == int
     assert field.name == 'id'
-    assert field.model is Role
     assert field.table
 
     assert Role.meta.fields['name'].db_type == 'VARCHAR(100)'
@@ -54,7 +33,7 @@ def test_manager(manager, User):
 
     query = manager(User)
     assert query
-    assert str(query.select()) == 'SELECT "id","name","is_active","role_id" FROM "user"'
+    assert str(query.select()) == 'SELECT "id","name","created","is_active","role_id" FROM "user"'
 
 
 def test_select(manager, User, Role):
@@ -62,7 +41,7 @@ def test_select(manager, User, Role):
 
     qs = qb.select()
     assert qs
-    assert str(qs) == 'SELECT "id","name","is_active","role_id" FROM "user"'
+    assert str(qs) == 'SELECT "id","name","created","is_active","role_id" FROM "user"'
 
     # TODO: Support joins
     #  qs = qb.select(User, Role.name).join(Role).on(User.role_id == Role.id).where(User.is_active)
@@ -108,6 +87,7 @@ def test_schema(manager, User):
         'CREATE TABLE IF NOT EXISTS "user" ('
         '"id" INTEGER,'
         '"name" VARCHAR(256),'
+        '"created" DATETIME,'
         '"is_active" SMALLINT NOT NULL DEFAULT true,'
         '"role_id" INTEGER,'
         'PRIMARY KEY ("id"),'

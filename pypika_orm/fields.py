@@ -30,20 +30,15 @@ class Field(_Field, metaclass=FieldMeta):
     db_type: str
 
     name: str
-    model: 'Model'
 
     def __init__(self, null: bool = None, default: t.Any = None, **meta):
         self.null = null
-        self.default = default
         self.meta = meta
+        self.default = default
 
     def bind(self, model: 'Model', name: str):
         self.name = name
-        self.model = model
         self.table = model.meta.table
-
-        meta = model.meta
-        meta.fields[name] = self
 
         model.meta.fields[name] = self
 

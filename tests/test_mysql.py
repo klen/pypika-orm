@@ -29,6 +29,7 @@ async def test_create_table(User, manager):
         'CREATE TABLE `user` ('
         '`id` INTEGER AUTO_INCREMENT,'
         '`name` VARCHAR(256),'
+        '`created` DATETIME,'
         '`is_active` BOOL NOT NULL DEFAULT true,'
         '`role_id` INTEGER,'
         'PRIMARY KEY (`id`),'

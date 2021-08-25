@@ -110,7 +110,7 @@ class ModelBuilderMixin(ModelDBMixin):
         builder = self.QUERY_CLS.create_table(meta.table, db=self._db, dialect=self.dialect)
         columns = {field.name: Column(
             field.name, column_type=self.DB_TYPES.get(type(field), field.db_type),
-            default=field.default, nullable=field.null,
+            default=field.default if not callable(field.default) else None, nullable=field.null,
         ) for field in meta.fields.values()}
 
         builder = builder.columns(*columns.values())

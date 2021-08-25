@@ -1,5 +1,7 @@
 import pytest
 
+import datetime as dt
+
 
 @pytest.fixture(scope='module')
 def db_url():
@@ -21,6 +23,7 @@ def Role():
     class Role(Model):
         id = fields.Auto()
         name = fields.Varchar(max_length=100, default='user')
+        created = fields.Datetime(default=dt.datetime.utcnow)
 
     return Role
 
@@ -32,6 +35,7 @@ def User(Role):
     class User(Model):
         id = fields.Auto()
         name = fields.Varchar()
+        created = fields.Datetime(default=dt.datetime.utcnow)
         is_active = fields.Bool(default=True, null=False)
 
         role_id = fields.ForeignKey(Role.id)
