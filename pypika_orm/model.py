@@ -16,7 +16,7 @@ class ModelOptions:
 
     table_name: str = ''
     primary_key: t.Optional[str] = None
-    foreign_keys: t.Optional[t.Dict[str, Field]] = None
+    foreign_keys: t.Dict[str, Field]
 
     def __init__(self, cls):
         """Inherit meta options."""
@@ -56,10 +56,12 @@ class ModelOptions:
 class Model:
     """Base model class."""
 
+    meta: ModelOptions
+
     def __init__(self, __with_defaults__: bool = True, **values):
         """Initialize the model."""
         self.__data__ = {}
-        self.__dirty__ = set()
+        self.__dirty__: t.Set[str] = set()
 
         if __with_defaults__:
             for name, field in self.meta.fields.items():
@@ -82,8 +84,13 @@ class Model:
         return f"<{model} {self}>"
 
     def __eq__(self, obj):
-        return isinstance(obj, type(self)) and obj.id and obj.id == self.id
+        return isinstance(obj, type(self)) and obj._pk and obj._pk == self._pk
 
     @classmethod
     def get_sql(cls, **kwargs: t.Any) -> str:
         return cls.meta.table.get_sql(**kwargs)
+
+    @property
+    def _pk(self) -> t.Any:
+        """Get a primary key value."""
+        return self.meta.primary_key and self.__data__.get(self.meta.primary_key)

@@ -20,7 +20,7 @@ from .fields import Field
 class ModelDBMixin:
 
     _db: t.Optional[Database]
-    _model: Model
+    _model: t.Type[Model]
 
     get_sql: t.Callable[..., str]
 
@@ -63,7 +63,7 @@ class ModelBuilderMixin(ModelDBMixin):
 
     DB_TYPES: t.Dict[t.Type[Field], 'str'] = {}
 
-    def __init__(self, model: Model, **kwargs):
+    def __init__(self, model: t.Type[Model], **kwargs):
         self._model = model
         super().__init__(**kwargs)
         self._from = [model.meta.table]
@@ -185,6 +185,8 @@ def builder_params(builder: QueryBuilder) -> t.Dict[str, t.Any]:
         columns = [term.name for term in builder._columns]
         values = [term.value for row in builder._values for term in row]
         return dict(zip(columns, values))
+
+    return {}
 
 
 from .model import Model  # noqa

@@ -33,7 +33,7 @@ class Manager:
             self.db = database
             self.dialect = Dialects(_dialects.get(database.backend.name, database.backend.name))
 
-    def __call__(self, model: Model, **kwargs) -> ModelQueryBuilder:
+    def __call__(self, model: t.Type[Model], **kwargs) -> ModelQueryBuilder:
         """Create a query builder."""
         builder_cls = DIALECT_TO_BUILDER.get(self.dialect, ModelQueryBuilder)
         if builder_cls is ModelQueryBuilder:
@@ -72,8 +72,8 @@ class Manager:
         assert isinstance(model, Model), '{model} is not an instance of `Model`'
         primary_key = model.meta.primary_key
 
-        if getattr(model, model.meta.primary_key):
-            breakpoint()
+        if primary_key and getattr(model, primary_key):
+            # TODO: Do update
             pass
 
         return await self(type(model)).insert(**model.__data__).execute()
