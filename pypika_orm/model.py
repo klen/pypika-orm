@@ -1,7 +1,7 @@
 import typing as t
 
 from copy import deepcopy
-from pypika.queries import Table, Selectable
+from pypika.queries import Table
 
 from .fields import Field
 
@@ -15,7 +15,7 @@ class ModelOptions:
     fields: t.Dict[str, Field]
 
     table_name: str = ''
-    primary_key: t.Optional[t.List[str]] = None
+    primary_key: t.Optional[str] = None
     foreign_keys: t.Optional[t.Dict[str, Field]] = None
 
     def __init__(self, cls):
@@ -50,21 +50,24 @@ class ModelOptions:
                 attr.bind(cls, name)
 
         if not self.primary_key and self.fields:
-            self.primary_key = list(self.fields.keys())[0],
+            self.primary_key = list(self.fields.keys())[0]
 
 
-class Model(Selectable):
+class Model:
     """Base model class."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, __with_defaults__: bool = True, **values):
         """Initialize the model."""
-        for name, field in self.meta.fields.items():
-            if field.default is None:
-                continue
+        self.__data__ = {}
+        self.__dirty__ = set()
 
-            setattr(self, name, field.default() if callable(field.default) else field.default)
+        if __with_defaults__:
+            for name, field in self.meta.fields.items():
+                if field.default is not None:
+                    self.__data__[name] = (
+                        field.default() if callable(field.default) else field.default)
 
-        for name, value in kwargs.items():
+        for name, value in values.items():
             setattr(self, name, value)
 
     def __init_subclass__(cls, **kwargs):
@@ -72,11 +75,14 @@ class Model(Selectable):
         return cls
 
     def __str__(self):
-        return ','.join(f"{getattr(self, pk)}" for pk in self.meta.primary_key)
+        return f"{getattr(self, self.meta.primary_key, '')}"
 
     def __repr__(self):
         model = type(self).__name__
         return f"<{model} {self}>"
+
+    def __eq__(self, obj):
+        return isinstance(obj, type(self)) and obj.id and obj.id == self.id
 
     @classmethod
     def get_sql(cls, **kwargs: t.Any) -> str:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as t
 
 import datetime
@@ -24,6 +26,22 @@ class FieldMeta(type):
         return super(FieldMeta, mcs).__new__(mcs, name, bases, attrs)
 
 
+class FieldAccessor:
+
+    def __init__(self, name: str, field: Field):
+        self.name = name
+        self.field = field
+
+    def __get__(self, model, instance_type=None):
+        if model is not None:
+            return model.__data__.get(self.name)
+        return self.field
+
+    def __set__(self, model, value):
+        model.__data__[self.name] = value
+        model.__dirty__.add(self.name)
+
+
 class Field(_Field, metaclass=FieldMeta):
 
     py_type: t.Type
@@ -41,6 +59,7 @@ class Field(_Field, metaclass=FieldMeta):
         self.table = model.meta.table
 
         model.meta.fields[name] = self
+        setattr(model, name, FieldAccessor(name, self))
 
 
 class Auto(Field, int):

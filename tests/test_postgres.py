@@ -59,3 +59,15 @@ async def test_db(manager, User, Role):
     assert isinstance(role, Role)
     assert role.id == 1
     assert role.name == 'user'
+
+    await manager(User).insert(name='jim', role_id=1).execute()
+    [user] = await manager(User).select().fetchall()
+    assert user.id == 1
+    assert user.name == 'jim'
+    assert user.role_id == 1
+
+    qs = manager(User).select(User, Role).join(Role).on(
+        User.role_id == Role.id).where(User.is_active)
+
+    [rec] = await manager.fetchall(qs)
+    assert rec

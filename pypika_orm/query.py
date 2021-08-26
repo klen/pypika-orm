@@ -111,6 +111,21 @@ class ModelBuilderMixin(ModelDBMixin):
 
         return QueryBuilder.join(self, item, **kwargs)
 
+    async def execute(self: QueryBuilder, *args, **kwargs) -> t.Awaitable:
+        assert self._db, 'DB is not initializated'
+        sql = self.get_sql()
+        res = await self._db.execute(sql, *args, **kwargs)
+        if self._insert_table:
+            params = builder_params(self)
+            return self._model(__with_defaults__=False, **dict(params, id=res))
+
+        return res
+
+    def executemany(self, *args, **kwargs) -> t.Awaitable:
+        assert self._db, 'DB is not initializated'
+        sql = self.get_sql()
+        return self._db.executemany(sql, *args, **kwargs)
+
     def create_table(self: QueryBuilder) -> ModelCreateQueryBuilder:
         meta = self._model.meta
         builder = self.QUERY_CLS.create_table(meta.table, db=self._db, dialect=self.dialect)
@@ -122,7 +137,7 @@ class ModelBuilderMixin(ModelDBMixin):
         builder = builder.columns(*columns.values())
 
         if meta.primary_key:
-            builder = builder.primary_key(*meta.primary_key)
+            builder = builder.primary_key(meta.primary_key)
 
         for name, field in meta.foreign_keys.items():
             builder = builder.foreign_key(
@@ -163,6 +178,13 @@ class ModelCreateQueryBuilder(ModelDBMixin, CreateQueryBuilder):
 class ModelDropQueryBuilder(ModelDBMixin, DropQueryBuilder):
 
     QUERY_CLS = ModelQuery
+
+
+def builder_params(builder: QueryBuilder) -> t.Dict[str, t.Any]:
+    if builder._insert_table:
+        columns = [term.name for term in builder._columns]
+        values = [term.value for row in builder._values for term in row]
+        return dict(zip(columns, values))
 
 
 from .model import Model  # noqa

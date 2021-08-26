@@ -67,3 +67,13 @@ class Manager:
 
     def __repr__(self) -> str:
         return f"<Manager {self}>"
+
+    async def save(self, model: Model) -> Model:
+        assert isinstance(model, Model), '{model} is not an instance of `Model`'
+        primary_key = model.meta.primary_key
+
+        if getattr(model, model.meta.primary_key):
+            breakpoint()
+            pass
+
+        return await self(type(model)).insert(**model.__data__).execute()
