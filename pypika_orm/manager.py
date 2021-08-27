@@ -31,7 +31,8 @@ class Manager:
                 database = Database(database)
 
             self.db = database
-            self.dialect = Dialects(_dialects.get(database.backend.name, database.backend.name))
+            self.dialect = Dialects(
+                _dialects.get(database.backend.db_type, database.backend.db_type))
 
     def __call__(self, model: t.Type[Model], **kwargs) -> ModelQueryBuilder:
         """Create a query builder."""
