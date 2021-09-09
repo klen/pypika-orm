@@ -8,11 +8,11 @@ async def db_url():
 
 @pytest.fixture(scope='module', autouse=True)
 async def setup(manager, Role, User):
-    await manager(Role).create_table().if_not_exists().execute()
-    await manager(User).create_table().if_not_exists().execute()
+    await manager(Role).create_table().if_not_exists()
+    await manager(User).create_table().if_not_exists()
     yield
-    await manager(User).drop_table().if_exists().execute()
-    await manager(Role).drop_table().if_exists().execute()
+    await manager(User).drop_table().if_exists()
+    await manager(Role).drop_table().if_exists()
 
 
 async def test_builder(User, manager):
@@ -45,10 +45,10 @@ async def test_drop_table(manager, User):
 
 
 async def test_db(manager, User, Role):
-    res = await manager(Role).insert(name='user').execute()
+    res = await manager(Role).insert(name='user')
     assert res
 
-    res = await manager(Role).insert(name='admin').execute()
+    res = await manager(Role).insert(name='admin')
     assert res
 
     [role1, role2] = await manager(Role).select().fetchall()

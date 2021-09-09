@@ -51,11 +51,11 @@ $ pip install pypika-orm[mysql]
     from pypika_orm import Manager
 
     async with Manager('sqlite:///:memory:') as manager:
-        await manager(Role).create_table().if_not_exists().execute()
-        await manager(User).create_table().if_not_exists().execute()
+        await manager(Role).create_table().if_not_exists()
+        await manager(User).create_table().if_not_exists()
 
-        await manager(Role).insert(name='user').execute()
-        await manager(User).insert(name='jim', role_id=1).execute()
+        await manager(Role).insert(name='user')
+        await manager(User).insert(name='jim', role_id=1)
 
         [user] = await manager(User).select().fetchall()
         assert user
@@ -64,12 +64,12 @@ $ pip install pypika-orm[mysql]
 ## Bug tracker
 
 If you have any suggestions, bug reports or annoyances please report them to
-the issue tracker at https://github.com/klen/aio-databases/issues
+the issue tracker at https://github.com/klen/pypika-orm/issues
 
 
 ## Contributing
 
-Development of the project happens at: https://github.com/klen/aio-databases
+Development of the project happens at: https://github.com/klen/pypika-orm
 
 
 ## License

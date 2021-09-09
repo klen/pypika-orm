@@ -8,12 +8,12 @@ async def db_url():
 
 @pytest.fixture(scope='module', autouse=True)
 async def setup(manager, Role, User):
-    await manager(Role).create_table().if_not_exists().execute()
-    await manager(User).create_table().if_not_exists().execute()
+    await manager(Role).create_table().if_not_exists()
+    await manager(User).create_table().if_not_exists()
     yield
 
-    await manager(User).drop_table().if_exists().execute()
-    await manager(Role).drop_table().if_exists().execute()
+    await manager(User).drop_table().if_exists()
+    await manager(Role).drop_table().if_exists()
 
 
 @pytest.fixture(autouse=True)
@@ -34,14 +34,14 @@ async def test_builder(User, manager):
 
 
 async def test_insert(manager, User, Role):
-    role = await manager(Role).insert(name='user').execute()
+    role = await manager(Role).insert(name='user')
     assert role
     assert isinstance(role, Role)
     assert role.id == 1
     assert role.name == 'user'
     assert role.created is None
 
-    user = await manager(User).insert(name='jim', role_id=role.id).execute()
+    user = await manager(User).insert(name='jim', role_id=role.id)
     assert user
     assert isinstance(user, User)
     assert user.id == 1
@@ -63,11 +63,11 @@ async def test_save(manager, Role):
 
 
 async def test_db(manager, User, Role):
-    role = await manager(Role).insert(name='user').execute()
+    role = await manager(Role).insert(name='user')
     assert role
     assert role.id
 
-    role = await manager(Role).insert(name='admin').execute()
+    role = await manager(Role).insert(name='admin')
     assert role
     assert role.id
 
@@ -83,7 +83,7 @@ async def test_db(manager, User, Role):
     assert role.id == 1
     assert role.name == 'user'
 
-    await manager(User).insert(name='jim', role_id=role1.id).execute()
+    await manager(User).insert(name='jim', role_id=role1.id)
     [user] = await manager(User).select().fetchall()
     assert user.id == 1
     assert user.name == 'jim'

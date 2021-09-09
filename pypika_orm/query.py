@@ -33,6 +33,9 @@ class ModelDBMixin:
         sql = self.get_sql()
         return self._db.execute(sql, *args, **kwargs)
 
+    def __await__(self):
+        return self.execute().__await__()
+
     def executemany(self, *args, **kwargs) -> t.Awaitable:
         assert self._db, 'DB is not initializated'
         sql = self.get_sql()
@@ -120,6 +123,9 @@ class ModelBuilderMixin(ModelDBMixin):
             return self._model(__with_defaults__=False, **dict(params, id=res))
 
         return res
+
+    def __await__(self):
+        return self.execute().__await__()
 
     def executemany(self, *args, **kwargs) -> t.Awaitable:
         assert self._db, 'DB is not initializated'
